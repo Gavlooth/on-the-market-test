@@ -84,7 +84,4 @@
 (defmethod coerce-arguments :S [x more]
   [:S])
 
-(defmethod coerce-arguments :X [x more]
-  [:X])
-
 

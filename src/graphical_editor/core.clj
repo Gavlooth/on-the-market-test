@@ -6,6 +6,13 @@
 
 (def state& (atom nil))
 
+(defmacro exception-catcher [body]
+  `(try ~body
+        (catch IndexOutOfBoundsException e#
+          (println "You exeded image dimentions. Please try again"))))
+
+
+
 (defn initialize-image  [[dim-X dim-Y]]
  (let [generator-fn (comp vec repeat)]
    (reset! state& (generator-fn dim-X (generator-fn dim-Y 0)))))
@@ -16,7 +23,7 @@
     (swap! state& clear-fn))))
 
 (defn color-pixel [[dim-X dim-Y color]]
- (swap! state& assoc-in  [dim-X dim-Y] color))
+ (exception-catcher (swap! state& assoc-in  [dim-X dim-Y] color)))
 
 (defn- replace-subvector [a-vector start end value]
   (loop [i start the-vector (transient a-vector)]
@@ -25,28 +32,34 @@
       (persistent! the-vector))))
 
 (defn draw-horizontal-segment [[X1 X2 Y  color]]
- (let [start (min X1 X2) end (max X1 X2)]
-  (swap! state&  update Y replace-subvector start end color)))
+ (exception-catcher
+   (let [start (min X1 X2) end (max X1 X2)]
+     (swap! state&  update Y replace-subvector start end color))))
 
 (defn draw-vertical-segment [[X Y1 Y2 color]]
+ (exception-catcher
   (let [start (min Y1 Y2) end (max Y1 Y2)]
-    (loop [i start state (transient @state&)]
-      (if (<= i end)
-        (let [current-column (get state i)
-              updated-column (assoc current-column X color)]
-          (recur (inc i) (assoc! state i updated-column)))
-        (reset! state& (persistent! state))))))
+     (loop [i start state (transient @state&)]
+       (if (<= i end)
+         (let [current-column (get state i)
+               updated-column (assoc current-column X color)]
+           (recur (inc i) (assoc! state i updated-column)))
+         (reset! state& (persistent! state)))))))
 
 
 (defn region-R
   ([x](region-R x [-1 -1]))
-  ([[X Y  :as cords] previous]
-   (let [image (deref state&)
-         pixel-fn (fn [[x y]]  (get (get image x) y))
-         current-pixel  (pixel-fn cords)
-         candidates  (remove #{previous} [[(inc X) Y] [(dec X) Y] [X (inc Y)]  [X (dec Y)]])
-         similar-neighbour-pixels  (filter #(= current-pixel (pixel-fn %)) candidates)]
-     (lazy-cat  [cords] (mapcat #(region-R % cords)  similar-neighbour-pixels)))))
+  ([[X Y  :as cords] previous
+     (let [image (deref state&)
+           pixel-fn (fn [[x y]]  (get (get image x) y))
+           current-pixel  (pixel-fn cords)
+           candidates  (remove #{previous} [[(inc X) Y] [(dec X) Y]
+                                            [X (inc Y)]  [X (dec Y)]])
+           similar-neighbour-pixels  (filter
+                                       #(= current-pixel (pixel-fn %))
+                                       candidates)]
+       (lazy-cat  [cords] (mapcat #(region-R % cords)
+                                  similar-neighbour-pixels)))]))
 
 
 
@@ -55,12 +68,13 @@
 ;; It can be further improved by turning the colument vectors to transients
 
 (defn fill-region-R [[X Y C]]
+ (exception-catcher
   (let [the-region-R  (region-R [X Y])
         transient-state (transient @state&)]
      (loop [image transient-state pixels the-region-R]
        (if-let  [[x y]  (first pixels)]
         (recur  (assoc! image x (assoc (get image x) y C)) (rest pixels))
-        (reset! state& (persistent! image))))))
+        (reset! state& (persistent! image)))))))
 
 
 

@@ -4,6 +4,8 @@
             [ graphical-editor.specs :as specs])
   (:gen-class))
 
+;;;;Main program, and functions
+
 (def state&
  "Holds the image in current sesssion"
   (atom nil))
@@ -12,6 +14,8 @@
 ;; nonexisting pixels. This is generaly better that having dynamic
 ;; spec restricting the operation on pixel.
 
+;;; Image operations
+
 (defmacro catch-out-of-bounds
  "wraps body in a try catch exeption that check wheneve
   there is an out of bounds  access"
@@ -19,8 +23,6 @@
   `(try ~body
         (catch IndexOutOfBoundsException e#
           (println "You exeded image dimentions. Please try again"))))
-
-
 
 (defn initizalize-image!
  "Creates an MxN vector of vectors representing an image"
@@ -88,7 +90,6 @@
                                 similar-neighbour-pixels)))))
 
 
-
 ;; Here only the top level vector is turned to transient
 ;; hence then internal updated doesn( use mutation and could be inefficient
 
@@ -116,16 +117,7 @@
     (println))))
 
 
-#_(do
-    (initizalize-image! [10 20])
-    (color-pixel [1 1 "R"])
-    (color-pixel [3 4 "R"])
-    (color-pixel [4 4 "R"])
-    (color-pixel [3 3 "R"])
-    (color-pixel [3 2 "R"])
-    (color-pixel [2 2 "R"]))
-#_(region-R [3 3])
-#_(fill-region-R! [3 3 "G"])
+;;; Main program
 
 (defn program-loop
  "Main program loop. Enter X to terminate"

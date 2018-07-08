@@ -2,6 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]))
 
+;;;; Funtions for validation and coersion of command line arguments
+
 ;;;specs for command input
 
 ;; Check if string can be coersed to integer
@@ -37,7 +39,6 @@
 
 (s/def ::X  #(>= (count %) 3))
 
-
 ;;DRY function for argument coersion
 (defn- coerce-helper [x]
   (let [head (pop x) tail (peek x)]
@@ -45,7 +46,11 @@
     (concat (map  ->int head)
             (str/upper-case tail)))))
 
-;; coerse command line arguments to the appropriate input types
+;;; Coersions
+
+;; Multifunction to  coerse the different
+;;command line arguments to the appropriate input types
+
 (defmulti coerce-arguments (fn [x more] (keyword x)))
 
 (defmethod coerce-arguments :I [_ more]

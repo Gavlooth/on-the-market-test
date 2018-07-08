@@ -12,43 +12,40 @@
 (def ->int #(Integer/parseInt %))
 
 
-(s/def ::skata ->integer?)
-(s/conform ::skata "q22")
-
 ;; Color should be RGB
 
 (def color? #{"R" "G" "B" "r" "g" "b"})
 
+;; Specs for command input arguments
+
 (s/def ::I  (s/and  #(= 2 (count %)) (s/tuple ->integer? ->integer?)))
 
+;; Image size restrictions
 (s/def ::in-range (s/and #(>= % 1) #(<= % 250)))
 
 (s/def ::C  #(= (count %) 0))
-;; (s/form)
 
 (s/def ::L  (s/and #(= (count %) 3) (s/tuple ->integer?  ->integer?  color?)))
 
-
 (s/def ::V  (s/and #(= (count %) 4) (s/tuple ->integer? ->integer?  ->integer?  color?)))
-
 
 (s/def ::H  (s/and #(= (count %) 4) (s/tuple ->integer? ->integer?  ->integer?  color?)))
 
-
 (s/def ::F  (s/and #(= (count %) 3) (s/tuple ->integer?  ->integer?  color?)))
-
 
 (s/def ::S  #(>= (count %) 3))
 
 (s/def ::X  #(>= (count %) 3))
 
 
+;;DRY function for argument coersion
 (defn- coerce-helper [x]
   (let [head (pop x) tail (peek x)]
    (vec
     (concat (map  ->int head)
             (str/upper-case tail)))))
 
+;; coerse command line arguments to the appropriate input types
 (defmulti coerce-arguments (fn [x more] (keyword x)))
 
 (defmethod coerce-arguments :I [_ more]

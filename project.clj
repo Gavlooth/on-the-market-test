@@ -16,7 +16,7 @@
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all :uberjar-name "gheditor.jar"}
 
-             :dev {:resource-paths ["test/dev-resources"]
+             :dev {;:resource-paths ["test/dev-resources"]
                    :dependencies   [ [org.clojure/tools.namespace "0.2.11"]]
 
 

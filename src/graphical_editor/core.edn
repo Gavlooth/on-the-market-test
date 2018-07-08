@@ -4,7 +4,7 @@
             [ graphical-editor.specs :as specs])
   (:gen-class))
 
-;;;; Main program and functions
+;;;;Main program, and functions
 
 (def state&
  "Holds the image in current sesssion"
@@ -72,24 +72,26 @@
             (recur (inc i) (assoc! state i updated-column)))
           (reset! state& (persistent! state)))))))
 
-;;Find region R incrementaly to avoid stack overflow
-;;This implementation uses transients in a loop for efficient
-;;Its east to refactor it,  to use lazy-seq instead
+(defn region-R
+  "Get the region R with respect to the current pixelR is defined as: Pixel
+   (X,Y) belongs to R. Any other) pixel which is the same colour as (X,Y) and
+   shares a common side with any pixel in R also belongs to this region."
+  ([x](region-R x [-1 -1]))
+  ([[X Y  :as cords] previous]
+   (let [image (deref state&)
+         pixel-fn (fn [[x y]]  (get (get image x) y))
+         current-pixel  (pixel-fn cords)
+         candidates  (remove #{previous} [[(inc X) Y] [(dec X) Y]
+                                          [X (inc Y)]  [X (dec Y)]])
+         similar-neighbour-pixels  (filter
+                                     #(= current-pixel (pixel-fn %))
+                                     candidates)]
+     (lazy-cat  [cords] (mapcat #(region-R % cords)
+                                similar-neighbour-pixels)))))
 
-(defn region-R [[X Y C]]
- (let [image (deref state&)
-       pixel-color (fn [[x y]]  (get (get image x) y "nil"))
-       color (pixel-color [X Y])
-       neighbours (fn [[x y]] [[(inc x) y] [(dec x) y] [x (inc y)] [x (dec y)]])
-       same-color-neighbours (fn [the-neighbours] (filter #(= color (pixel-color %)) the-neighbours))]
-  (loop [region-R (transient #{[X Y]})
-         candidates (neighbours [X Y])]
-    (let [similar-neighbour-pixels (same-color-neighbours candidates)
-          updated-region-R (reduce conj! region-R similar-neighbour-pixels)
-          new-candidates (remove updated-region-R (mapcat neighbours similar-neighbour-pixels))]
-      (if (seq new-candidates)
-        (recur updated-region-R new-candidates)
-        (persistent! updated-region-R))))))
+
+;; Here only the top level vector is turned to transient
+;; hence then internal updated doesn( use mutation and could be inefficient
 
 (defn fill-region-R!
   "Fill the region R with the colour C"
@@ -102,6 +104,8 @@
          (recur  (assoc! image x (assoc (get image x) y C)) (rest pixels))
          (reset! state& (persistent! image)))))))
 
+
+
 (defn show-image!
  "Show the contents of the current image"
   []
@@ -111,6 +115,7 @@
     (doseq [y x] (print y))
     (flush)
     (println))))
+
 
 ;;; Main program
 
@@ -140,5 +145,11 @@
 
 
 (defn -main [& args] (program-loop))
+
+
+
+
+
+
 
 

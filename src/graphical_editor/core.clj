@@ -92,7 +92,6 @@
         (recur updated-region-R new-candidates)
         (persistent! updated-region-R))))))
 
-
 (defn fill-region-R!
   "Fill the region R with the colour C"
   [[X Y C]]

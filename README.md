@@ -12,10 +12,9 @@ on the market interview
 
 ## Usage
 
-    $ java -jar graphical-editor-0.1.0-standalone.jar [args]
+    $ java -jar ./target/uberjar/gheditor.jar
 
-
-Commands
+Commands.
 A color is one of "R","G","B". This can be easily refactored to support more
 options.. The editor supports 8 commands:
 1. I M N. Create a new M x N image with all pixels coloured white (O).

@@ -15,7 +15,8 @@ on the market interview
 
 
 Commands
-The editor supports 8 commands:
+A color is one of "R","G","B". This can be easily refactored to support more
+options.. The editor supports 8 commands:
 1. I M N. Create a new M x N image with all pixels coloured white (O).
 2. C. Clears the table, setting all pixels to white (O).
 3. L X Y C. Colours the pixel (X,Y) with colour C.

@@ -10,9 +10,9 @@
  "Holds the image in current sesssion"
   (atom nil))
 
-;; Use this to help whene there is illicit association on
-;; nonexisting pixels. This is generaly better that having dynamic
-;; spec restricting the operation on pixel.
+;; Use this to help whenever there is illicit association on
+;; nonexisting pixels. This is generaly better (more efficient)
+;;than having dynamic  spec restricting the operation inside image boundarys
 
 ;;; Image operations
 
@@ -42,7 +42,7 @@
   [[dim-X dim-Y color]]
  (catch-out-of-bounds (swap! state& assoc-in  [dim-X dim-Y] color)))
 
-;;Use transients to operate on vectors for efficiency
+;; Use transients to operate on vectors for efficiency
 (defn- replace-subvector
   "Changes every element to a subvector to value"
   [a-vector start end value]
@@ -73,8 +73,9 @@
           (reset! state& (persistent! state)))))))
 
 ;;Find region R incrementaly to avoid stack overflow
-;;This implementation uses transients in a loop for efficient
-;;Its east to refactor it,  to use lazy-seq instead
+;;This implementation uses transients in a loop
+;;and is efficient but not layzy
+;;Can be easyly refactor, to use lazy-seq instead
 
 (defn region-R [[X Y C]]
  (let [image (deref state&)
@@ -90,6 +91,7 @@
       (if (seq new-candidates)
         (recur updated-region-R new-candidates)
         (persistent! updated-region-R))))))
+
 
 (defn fill-region-R!
   "Fill the region R with the colour C"

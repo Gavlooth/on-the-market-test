@@ -5,8 +5,9 @@ This is the "graphical editor" developed as part of the
 on the market interview
 
 ## Installation
-*git clone  https://github.com/Gavlooth/on-the-market-test.git
-*lein uberjar.
+* git clone  https://github.com/Gavlooth/on-the-market-test.git
+* cd on-the-market-test
+* lein uberjar.
 
 
 ## Usage
